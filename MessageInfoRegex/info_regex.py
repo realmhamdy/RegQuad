@@ -2,7 +2,8 @@ import codecs, re, argparse, unittest, os
 
 MSG_FILE = os.path.join(os.path.dirname(__file__), "REGEX_FINAL_EXAMPLE.txt")
 
-guestname_regex = re.compile(r"^Guest Name:\s*(?P<first_name>(?:[\w\.]+))(\s(?P<last_name>[\w\.]+))?\s*?", re.M)
+firstname_regex = re.compile(r"^Guest Name:\s*(?P<first_name>(?:[\w\.]+))(\s[\w\.]+)?\s*?", re.M)
+lastname_regex = re.compile(r"^Guest Name:\s*(?:[\w\.]+)(\s(?P<last_name>[\w\.]+))?\s*?", re.M)
 #a phone number can be "Not Provided" or 123-456-7891
 phonenumber_regex = re.compile(r"^Phone Number:\s*(?P<phone_number>((?:\w+\s?)|(?:\d+-?))+)\s*?", re.M) 
 email_regex = re.compile("^Email Address:\s*(?P<email>.+)\s*?", re.M)
@@ -13,19 +14,27 @@ class RegexTest(unittest.TestCase):
   def setUp(self):
     self.txt = codecs.open(MSG_FILE, 'r', encoding="utf-8").read()
     
-  def testGuestNameRegex(self):
+  def testGuestFirstName(self):
     s1 = "Guest Name: John Hacker"
-    match = guestname_regex.search(s1)
+    match = firstname_regex.search(s1)
     self.assertEqual(match.groupdict()["first_name"], "John", "John didn't match guest")
-    self.assertEqual(match.groupdict()["last_name"], "Hacker", "Hacker didn't match guest")
     s2 = "Guest Name: Mr.John Hacker"
-    match = guestname_regex.search(s2)
+    match = firstname_regex.search(s2)
     self.assertEqual(match.groupdict()["first_name"], "Mr.John", "Mr.John didn't match guest")
-    self.assertEqual(match.groupdict()["last_name"], "Hacker", "Hacker didn't match guest")
     #the real case
-    match = guestname_regex.search(self.txt)
+    match = firstname_regex.search(self.txt)
     self.assertEqual(match.groupdict()["first_name"], "Hannah", "First name matched '%s'" 
                      % match.groupdict()["first_name"])
+    
+  def testGuestNameRegex(self):
+    s1 = "Guest Name: John Hacker"
+    match = lastname_regex.search(s1)
+    self.assertEqual(match.groupdict()["last_name"], "Hacker", "Hacker didn't match guest")
+    s2 = "Guest Name: Mr.John Hacker"
+    match = lastname_regex.search(s2)
+    self.assertEqual(match.groupdict()["last_name"], "Hacker", "Hacker didn't match guest")
+    #the real case
+    match = lastname_regex.search(self.txt)
     self.assertFalse(match.groupdict()["last_name"], "Last name matched '%s'" % match.groupdict()["last_name"])
     
   def testPhoneNumberRegex(self):
